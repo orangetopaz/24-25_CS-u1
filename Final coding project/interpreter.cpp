@@ -16,6 +16,16 @@ namespace files_and_print{
 }
 using namespace files_and_print;
 
+int countChars(string str, char target){
+  int count = 0;
+  for(char term : str){
+    if(term == target){
+      count++;
+    }
+  }
+  return count;
+}
+
 vector<string> listifyFile(ifstream& file){
   char ch;  // Create a char var, which is used to output the text file car by char to check for newlines and ;
   vector<string> lines;  // create a list(vector/array) to store all of the functions and individual lines
@@ -40,7 +50,50 @@ vector<string> listifyFile(ifstream& file){
       }
     }
   }
+
+  vector<vector<string>> execs;
+
+  for (int i; i < lines.size(); i++){
+    vector<string> instruct;
+    if (lines[i][0] == '`'){
+
+    }
+  }
+
   return lines;
+}
+
+vector<string> findStrings(string line){
+  int nOfQuotes = countChars(line, '\"');  // sets nOfQuotes to the count of quotes in the select string
+  vector<int> pos;  // positions of quotation marks in the string
+  vector<string> strings;  // the strings (areas between quotation marks) using the positions as found in pos
+
+  // error handling
+  if (nOfQuotes == 0){
+    return vector<string> {"Error: No Quotes, Null # of Quotes"};
+  }
+  if (nOfQuotes % 2 != 0){
+    return vector<string> {"Error: No closing quotes, Null # of Quotes"};
+  }
+  //if(nOfQuotes == 2){return vector<string> {"Valid"};}
+
+  // find positions of quotation marks
+  int minPos = -1;
+  while(countChars(line.substr(minPos), '\"') != 0){  // loops through each " in the string, until there aren't any
+    int newestPos = line.substr(minPos, line.length()).find('\"');  // finds the position of closest to beginning location of " along the string
+    pos.push_back(newestPos);  // appends the newest found position to the list of positions
+    minPos = newestPos + 1;  // sets the new starting position to search from to the newest one found +1
+  }
+
+  // assign the terms of strings to the stuff inbetween 2 quotes as found in the vector<int> pos section above
+  for(int i=0; i < nOfQuotes/2; i++){
+    strings.push_back(line.substr(pos[i*2]+1, pos[(i*2)+1]-1));  // appends a substr of the inputted string, from the first quote's pos +1 (first char in the string) and 2nd quote's pos -1(last char in the string), then changing 1st and second as needed
+  }
+  return strings;
+}
+
+void printList(vector<string> list){
+  cout << "["; for(const auto& term : list){cout << term << ", "; } cout << "]";
 }
 
 int main () {
@@ -50,7 +103,11 @@ int main () {
 
   vector<string> instructions = listifyFile(el2File);
 
-  cout << "["; for(const auto& line : instructions){cout << line << ", "; } cout << "]";
+  //cout << "["; for(const auto& line : instructions){cout << line << ", "; } cout << "]";
+  printList(instructions);
+  cout << "\n\n\n";
+  cout << instructions[0];
+  printList(findStrings(instructions[0]));
 
   // Close the file
   el2File.close();
