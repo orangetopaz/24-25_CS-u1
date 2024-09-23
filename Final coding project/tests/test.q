@@ -9,6 +9,6 @@ if mode = 1{
 if mode = 2{
     `(line+“\n”)*loops
 }
-else{
+else {
     `.error "Invalid Mode"
 }

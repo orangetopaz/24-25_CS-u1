@@ -76,17 +76,30 @@ void printIList(vector<int> list){
   cout << "["; for(const auto& term : list){cout << term << ", "; } cout << "]";
 }
 
-vector<string> findStrings(string line){
+void printStrPair(pair<string, string> inPair){
+  cout << '[' << inPair.first << ", " << inPair.second << ']';
+}
+
+void printGoof1(pair<string, pair<string, string>> inPair){  // kinda temp but idk
+  cout << '[' << inPair.first << ", ";
+  printStrPair(inPair.second); cout << ']';
+}
+
+void printStrStack(unordered_map<string, pair<string, string>> list){
+  cout << "["; for(const auto& term : list){printGoof1(term); cout << ", "; } cout << "]";
+}
+
+pair<vector<int>, vector<string>> findStrings(string line){
   int nOfQuotes = countChars(line, '\"');  // sets nOfQuotes to the count of quotes in the select string
   vector<int> pos;  // positions of quotation marks in the string
   vector<string> strings;  // the strings (areas between quotation marks) using the positions as found in pos
 
   // error handling
   if (nOfQuotes == 0) {
-    return vector<string> {"Error: No Quotes, Null # of Quotes"};
+    return pair<vector<int>, vector<string>> {{1}, {"Error: No Quotes, Null # of Quotes"}};
   }
   if (nOfQuotes % 2 != 0) {
-    return vector<string> {"Error: No closing quotes, Null # of Quotes"};
+    return pair<vector<int>, vector<string>> {{1}, {"Error: No closing quotes, Null # of Quotes"}};
   }
 
   // find positions of quotation marks
@@ -106,16 +119,24 @@ vector<string> findStrings(string line){
     strings.push_back(line.substr(pos[i * 2] + 1, pos[(i * 2) + 1] - pos[i * 2] - 1));  // extract string between the quotes (first arg of substr is position, second is len)
   }
 
-  return strings;
+  pair<vector<int>, vector<string>> fin;
+
+  fin.first = pos;
+  fin.second = strings;
+
+  return fin;
 }
+
+string validVarChars = "abcdefghijklmnopqrstuvwxyz_1234567890§ABCDEFGHIJKLMNOPQRSTUVWXYZœ∑´®†¨ˆøπåß∂ƒ©˙∆˚¬æ«`Ωç√∫˜µ™£¢º€‹›ﬁﬂ‡ŒˇÁØ∏ÅÍÎÏÓÔÒÚÆ»Ç◊ıÂ";
 
 string findFunc(string line){
   string func;
   for(char ch : line){
-    func += ch;
-    if(ch == ' ' || '\"' || "."){  //.......................................................REMOVE THE . FOR FUTURE STUFF, MAYBE ADD IT AS AN ARG TO OTHER FUNCTIONS
+    if(countChars(validVarChars, ch) == 0){
       break;
     }
+    func += ch;
+    if (ch == '`'){break;}
   }
   return func;
 }
@@ -157,28 +178,37 @@ int main (){
 
   for(string line : instructions){
     string func = findFunc(line);
-    if (func == "`" || "print"){
-      PRINT(" YOU MADE A LINE!!! \n");  //.......................................................ADD INPUT FOR STRINGS FROM FILE
+    cout << func << endl;
+    vector<string> args;
+    if (func == "`" || func == "print"){
+      args[0] = findStrings(line).first[0];
+      PRINT(args[0]);  //.......................................................ADD INPUT FOR STRINGS FROM FILE
     } else {
-      if (func == "~" || "read"){
+      if (func == "~" || func ==  "read"){
         READ();  //................................................................................MAYBE LET IT PRINT FROM THE READ FUNCTION LIKE IN PYTHON
       } else {
-        if (func == "str" || "string"){
-          PUSH("int", "x", "read");  //.......................................................ADD INPUT FOR NAME AND VAL
+        if (func == "str" || func ==  "string"){
+          cout << "str push" << endl;
+          PUSH("str", "line", "read");  //.......................................................ADD INPUT FOR NAME AND VAL
         } else {
-          if (func == "int" || "intager"){
-            PUSH("int", "x", "read");  //.......................................................ADD INPUT FOR NAME AND VAL
+          if (func == "int" || func ==  "intager"){
+            cout << "int push" << endl;
+            PUSH("int", "loop", "read");  //.......................................................ADD INPUT FOR NAME AND VAL
           } else {
             if (func == "if"){
-
+              
             }  else {
-              cout <<
+              cout << "some function I havn't cared to add yet" << endl;
             }
           }
         }
       }
     }
   }
+
+  cout << "\n\n";
+  printStrStack(stack);
+  cout << "\n\n";
 
   // Close the file
   el2File.close();
