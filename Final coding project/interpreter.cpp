@@ -32,7 +32,7 @@ int countChars(string str, char target){
 }
 
 vector<string> listifyFile(ifstream& file){
-  char ch;  // Create a char var, which is used to output the text file car by char to check for newlines and ;
+  char ch;  // Create a char var, which is used to check the text file car by char to check for newlines and ;
   vector<string> lines;  // create a list(vector/array) to store all of the functions and individual lines
   string currentLine;  // create a string to store the current line that the loop is on, to add to the lines list(vector/array)
 
@@ -42,9 +42,9 @@ vector<string> listifyFile(ifstream& file){
     if (ch == '\n' || ch == ';') {  // excude new lines
       // If newline or semicolon is encountered, save the current line
       if (!currentLine.empty()) {
-          lines.push_back(currentLine);  // pushes the current line to the back end (last spot (append)) of the lines list
-          currentLine.clear();
-          previouslyNewLine = true;
+        lines.push_back(currentLine);  // pushes the current line to the back end (last spot (append)) of the lines list
+        currentLine.clear();
+        previouslyNewLine = true;
       }
     }
     else {
