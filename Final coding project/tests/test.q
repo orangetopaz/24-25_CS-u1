@@ -7,7 +7,7 @@ if mode = 1{
     }
 }
 if mode = 2{
-    `(line+“\n”)*loops
+    `(line+"\n")*loops
 }
 else {
     `.error "Invalid Mode"
