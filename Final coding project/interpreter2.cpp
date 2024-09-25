@@ -255,7 +255,7 @@ vector<string> fileGetTokens(ifstream& file){
         tokens.push_back(currentToken);
         currentToken.clear();
       }
-      previouslyNewLine = true;
+      if(!inString){previouslyNewLine = true;}
     }
     Pch = ch;
   }
@@ -307,7 +307,6 @@ int main(){
   printList(tokens); cout << "\n\n";
   tokens = fileGetTokens(test);
   printList(tokens); cout << "\n\n";
-  cout << tokens[2].empty() << endl;
 
 /* Stack Tests
   //testing stack
