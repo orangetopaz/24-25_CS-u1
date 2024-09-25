@@ -142,7 +142,7 @@ public:
 //#######################################################################################################################
 
 typedef variant<int, float, string, bool, double> anyVar_t;
-typedef vector<vector<string>> listolists_t;  // this just makes it so I don't have to type out that whole thing every time
+typedef vector<vector<string>> listoflists_t;  // this just makes it so I don't have to type out that whole thing every time
 
 string validChars = "abcdefghijklmnopqrstuvwxyz_1234567890§ABCDEFGHIJKLMNOPQRSTUVWXYZœ∑´®†¨ˆøπåß∂ƒ©˙∆˚¬æ«Ωç√∫˜µ™£¢º€‹›ﬁﬂ‡ŒˇÁØ∏ÅÍÎÏÓÔÒÚÆ»Ç◊ıÂ";
 
@@ -269,44 +269,38 @@ vector<string> fileGetTokens(ifstream& file){
   return tokens;
 }
 
-vector<string> combineStringsInTokens(vector<string> tokens){
-  bool inString = false;
-  string currentString;
-  vector<string> combined;
-  for(int i = 0; i < tokens.size(); i++){  // remember the = 0 ig cuz I spent a solid 10 min debugging to find it's this
-    if(tokens[i][0] == '\"' && !inString){  // create to current string token if " encountered
-      //currentString += tokens[i];  dont add the quoteation marks that signify the string
-      currentString += "<str>";  // string marker to make sure the token is identified as a string var
-      inString = true;
-    } else if(tokens[i][0] == '\"' && inString && tokens[i-1] != "\\"){  // if it is creating a string, and it encounters another " (that isn't preceded by \), push to final list
-      //currentString += tokens[i];  dont add the quoteation marks that signify the string
-      combined.push_back(currentString);
-      currentString.clear();
-      inString = false;
-    } else if(inString){  // add to current string token
-      if(tokens[i-1] != "\\"){currentString += ' ';}
-      currentString += tokens[i];
-    } else if(!inString){  // add to list as a whole, set back to normal if it isn't a string
-      combined.push_back(tokens[i]);
+listoflists_t tokensToLines(vector<string> tokens){
+  vector<string> currentLine;
+  listoflists_t returner;
+  for(string token : tokens){
+    if(token == "\n" || token == ";"){
+      returner.push_back(currentLine);
+      currentLine.clear();
+    }
+    else{
+      currentLine.push_back(token);
     }
   }
-  return combined;
+  return returner;
 }
 
+void printListOfLists(listoflists_t listoflist){
+  cout << "["; for(const auto& list : listoflist){printList(list); cout << ", ";} cout << "]";
+}
 
 
 int main(){
   ifstream file("tests/mainTest.q");
-  ifstream test("tests/test.q");
   VariableStack stack;
 
-  //printFile(file); cout << "\n\n\n";
-
-  //printList(combineStringsInTokens(fileGetTokens(file)));
   vector<string> tokens = fileGetTokens(file);
-  printList(tokens); cout << "\n\n";
-  tokens = fileGetTokens(test);
-  printList(tokens); cout << "\n\n";
+  listoflists_t listedTokens = tokensToLines(tokens);
+
+  //printFile(file); cout << "\n\n\n";
+  printList(tokens); cout << "\n\n\n";
+  printListOfLists(tokensToLines(tokens));
+
+  
 
 /* Stack Tests
   //testing stack
@@ -336,6 +330,5 @@ int main(){
   printAny(x); */
 
   file.close();
-  test.close();
   return 0;
 }
