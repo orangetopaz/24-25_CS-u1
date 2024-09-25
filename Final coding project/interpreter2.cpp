@@ -146,6 +146,8 @@ typedef vector<vector<string>> listoflists_t;  // this just makes it so I don't 
 
 string validChars = "abcdefghijklmnopqrstuvwxyz_1234567890§ABCDEFGHIJKLMNOPQRSTUVWXYZœ∑´®†¨ˆøπåß∂ƒ©˙∆˚¬æ«Ωç√∫˜µ™£¢º€‹›ﬁﬂ‡ŒˇÁØ∏ÅÍÎÏÓÔÒÚÆ»Ç◊ıÂ";
 
+vector<string> funcList = {"`", "print", "~", "read", "loop", "int", "str", "flt", "bool", "intager", "float", "floating_point", "floating_point_number", "string", "boolean", "if", "elif", "else"};
+
 void resetFile(ifstream& file){
   file.clear();  // only modifies the flags and errors, in this case, removing the endoffile flag, allowing for another loop through
   file.seekg(0, file.beg);  // sets the internal file pointer to the beginning
@@ -177,6 +179,20 @@ char getNthFileChar(ifstream& file, int n){
     if(i == n){break;}
   }
   return returner;
+}
+
+
+bool inList(vector<string> list, string term){
+  if(std::any_of(list.begin(), list.end(), [term](string q) {return term == q;})){  // another lambda function, kinda know how they work but no really, original for this one: https://stackoverflow.com/a/60131309
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+vector<string> subVector(vector<string> original, int spos, int epos){
+  return vector<string> (original.begin() + spos, original.begin() + epos);
 }
 
 
@@ -220,7 +236,7 @@ void printList(vector<string> list){
   cout << "["; for(const auto& term : list){cout << term << ", "; } cout << "]";
 }
 
-vector<string> fileGetTokens(ifstream& file){
+vector<string> fileGetTokens(ifstream& file){  // I probably spent about 1/3 of my entire coding time on this, just getting it to work, isn't anything good but it does finaly (mostly probobly) work
   char ch;
   char Pch = '\0'; //  previos character
   vector<string> tokens;  // create a list(vector/array) to store all of the functions and individual tokens
@@ -230,6 +246,11 @@ vector<string> fileGetTokens(ifstream& file){
   bool inString = false;
 
   while (file.get(ch)){  // checks char by char the file
+
+    if(Pch == '\\'){ // maualy get rid of backslashes after they're delt with (lazy, i know, but i don't have the mental capacity to go through this mess of a function right now)
+      currentToken.pop_back();
+    }
+
     if(!(previouslyNewLine && (ch == ' ' || ch == '\t'))){
       if(inString){
         currentToken += ch;
@@ -281,6 +302,11 @@ listoflists_t tokensToLines(vector<string> tokens){
       currentLine.push_back(token);
     }
   }
+
+  if(!currentLine.empty()){
+    returner.push_back(currentLine);
+  }
+
   return returner;
 }
 
@@ -289,18 +315,105 @@ void printListOfLists(listoflists_t listoflist){
 }
 
 
+//#############  Invisible Functional Functions  ##############
+
+//string extractPrint(vector<string> tokens){}  // get a string from all the functions at the back of a print statement
+
+//#############  Visible Functional Functions  ##############
+
+void PRINT(int mode, string printed){
+  if(mode == 0){
+    cout << printed;
+  }
+  if(mode == 1){
+    cout << "Error: " << printed;
+  }
+}
+
+//###########################################################
+
+
 int main(){
-  ifstream file("tests/mainTest.q");
+  cout << "What file do you want to run? Full relative path to interpreter: "; string quarkFile; cin >> quarkFile; ifstream file(quarkFile);
   VariableStack stack;
 
   vector<string> tokens = fileGetTokens(file);
-  listoflists_t listedTokens = tokensToLines(tokens);
+  listoflists_t linedTokens = tokensToLines(tokens);
 
   //printFile(file); cout << "\n\n\n";
-  printList(tokens); cout << "\n\n\n";
-  printListOfLists(tokensToLines(tokens));
+  //printList(tokens); cout << "\n\n\n";
+  //printListOfLists(linedTokens); cout << "\n\n\n";
 
-  
+  string token;
+  string Ptoken;
+  string Ntoken;
+  vector<string> line;
+  string Lfunc;  // line function
+  for(int i=0; i<linedTokens.size(); i++){  // the reason for using the int interation instead of looping though the list is so i can more easily check the upcomeing and previous tokens
+    for(int j=0; j<linedTokens[i].size(); j++){
+      token = linedTokens[i][j];  // what you think im gonna type this out every time? I probably would but i was smarter this time
+      Ptoken = linedTokens[i][j-1];
+      Ntoken = linedTokens[i][j+1];
+      line = linedTokens[i];
+      Lfunc = linedTokens[i][0];
+
+      if(inList(funcList, token)){
+        if(token == "`" || token == "print"){
+          if(line.size() == 2 || line.size() == 4){  // as long as its either printing a string or error
+
+            if(Ntoken[0] == '\"' && line.size() == 2){
+              PRINT(0, Ntoken.substr(1, Ntoken.length()-2));
+            }
+            else if(Ntoken == "."){
+              if(linedTokens[i][j+2] == "error"){
+                PRINT(1, linedTokens[i][j+3].substr(1, linedTokens[i][j+3].length()-2));
+              } 
+              else{cout << "Sorry! Unsupourted function" << endl;}
+
+            }
+            else{cout << "Sorry! Unsupourted." << endl;}
+          }
+          else{cout << "Sorry! Unsupourted function" << endl;}
+        }
+
+        if(token == "~" || token == "read"){
+
+        }
+
+        if(token == "int" || token == "intager"){
+
+        }
+
+        if(token == "flt" || token == "float" || token == "floating_point" || token == "floating_point_number"){
+
+        }
+        
+        if(token == "str" || token == "string"){
+
+        }
+
+        if(token == "bool" || token == "boolean"){
+
+        }
+
+        if(token == "loop"){
+
+        }
+
+        if(token == "if"){
+          
+        }
+
+        if(token == "elif"){
+          
+        }
+
+        if(token == "else"){
+          
+        }
+      }
+    }
+  }
 
 /* Stack Tests
   //testing stack
@@ -329,6 +442,7 @@ int main(){
   x = 3.5;
   printAny(x); */
 
+  cout << "\n\n\n";
   file.close();
   return 0;
 }
