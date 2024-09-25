@@ -239,31 +239,37 @@ vector<string> combineStringsInTokens(vector<string> tokens){
   bool inString = false;
   string currentString;
   vector<string> combined;
-  for(string token : tokens){
-    if(token[0] == '\"' && !inString){
-      currentString += token;
+  for(int i = 0; i < tokens.size(); i++){  // remember the = 0 ig cuz I spent a solid 10 min debugging to find it's this
+    if(tokens[i][0] == '\"' && !inString){  // create to current string token if " encountered
+      //currentString += tokens[i];  dont add the quoteation marks that signify the string
+      currentString += "<str>";  // string marker to make sure the token is identified as a string var
       inString = true;
-    } else if(token[0] == '\"' && inString){
+    } else if(tokens[i][0] == '\"' && inString && tokens[i-1] != "\\"){  // if it is creating a string, and it encounters another " (that isn't preceded by \), push to final list
+      //currentString += tokens[i];  dont add the quoteation marks that signify the string
       combined.push_back(currentString);
       currentString.clear();
       inString = false;
-    } else if(inString){
-      currentString += token;
-      currentString += ' ';
-    } else if(!inString){
-      combined.push_back(token);
+    } else if(inString){  // add to current string token
+      if(tokens[i-1] != "\\"){currentString += ' ';}
+      currentString += tokens[i];
+    } else if(!inString){  // add to list as a whole, set back to normal if it isn't a string
+      combined.push_back(tokens[i]);
     }
   }
   return combined;
 }
 
+
+
 int main(){
   ifstream file("tests/test.q");
   VariableStack stack;
 
-  printFile(file); cout << "\n\n\n";
+  //printFile(file); cout << "\n\n\n";
 
   printList(combineStringsInTokens(fileGetTokens(file)));
+  vector<string> tokens = fileGetTokens(file);
+  //printList(tokens);
 
 /* Stack Tests
   //testing stack
