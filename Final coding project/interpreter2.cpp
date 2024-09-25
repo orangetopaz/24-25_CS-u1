@@ -206,9 +206,15 @@ vector<string> fileGetTokens(ifstream& file){
   string currentToken;  // create a string to store the current file that the loop is on, to add to the tokens list(vector/array)
 
   bool previouslyNewLine = false;  // var to help remove tabs
+  bool inString = false;
 
   while (file.get(ch)){  // checks char by char the file
     if(validChars.find(ch) == string::npos){  // if ch isn't part of the valid chars string
+      if(ch == '\"' && !inString){
+        inString = true;
+      } else if(ch == '\"' && inString){
+        inString = false;
+      }
       if(!currentToken.empty()){
         tokens.push_back(currentToken);
         currentToken.clear();
@@ -229,13 +235,35 @@ vector<string> fileGetTokens(ifstream& file){
   return tokens;
 }
 
+vector<string> combineStringsInTokens(vector<string> tokens){
+  bool inString = false;
+  string currentString;
+  vector<string> combined;
+  for(string token : tokens){
+    if(token[0] == '\"' && !inString){
+      currentString += token;
+      inString = true;
+    } else if(token[0] == '\"' && inString){
+      combined.push_back(currentString);
+      currentString.clear();
+      inString = false;
+    } else if(inString){
+      currentString += token;
+      currentString += ' ';
+    } else if(!inString){
+      combined.push_back(token);
+    }
+  }
+  return combined;
+}
+
 int main(){
   ifstream file("tests/test.q");
   VariableStack stack;
 
   printFile(file); cout << "\n\n\n";
 
-  printList(fileGetTokens(file));
+  printList(combineStringsInTokens(fileGetTokens(file)));
 
 /* Stack Tests
   //testing stack

@@ -1,4 +1,4 @@
-`"What to print?: "; str line = ~.l
+`"What to \"print?\": "; str line = ~.l
 `"How many lines?: "; int loops = ~.w
 `"What execution mode? [1/2]: "; int mode = ~.c
 if mode = 1{
