@@ -144,11 +144,11 @@ public:
 typedef variant<int, float, string, bool, double> anyVar_t;
 typedef vector<vector<string>> listolists_t;  // this just makes it so I don't have to type out that whole thing every time
 
-string validChars = "abcdefghijklmnopqrstuvwxyz_1234567890§ABCDEFGHIJKLMNOPQRSTUVWXYZœ∑´®†¨ˆøπåß∂ƒ©˙∆˚¬æ«`Ωç√∫˜µ™£¢º€‹›ﬁﬂ‡ŒˇÁØ∏ÅÍÎÏÓÔÒÚÆ»Ç◊ıÂ";
+string validChars = "abcdefghijklmnopqrstuvwxyz_1234567890§ABCDEFGHIJKLMNOPQRSTUVWXYZœ∑´®†¨ˆøπåß∂ƒ©˙∆˚¬æ«Ωç√∫˜µ™£¢º€‹›ﬁﬂ‡ŒˇÁØ∏ÅÍÎÏÓÔÒÚÆ»Ç◊ıÂ";
 
 void resetFile(ifstream& file){
   file.clear();  // only modifies the flags and errors, in this case, removing the endoffile flag, allowing for another loop through
-  file.seekg(0, std::ios::beg);  // sets the internal file pointer to the beginning
+  file.seekg(0, file.beg);  // sets the internal file pointer to the beginning
 }
 
 void printFile(ifstream& file){
@@ -157,6 +157,26 @@ void printFile(ifstream& file){
     cout << printed << endl;
   }
   resetFile(file);
+}
+
+int countFileChars(ifstream& file){
+  file.seekg(0, file.end);  // seek to end of file
+  int size = file.tellg();
+
+  resetFile(file);  // reset file pointer to the beginning of the file
+  return size;
+}
+
+char getNthFileChar(ifstream& file, int n){
+  char ch;
+  char returner;
+  int i = 0;
+  while(file.get(ch)){
+    returner = ch;
+    i++;
+    if(i == n){break;}
+  }
+  return returner;
 }
 
 
@@ -202,6 +222,7 @@ void printList(vector<string> list){
 
 vector<string> fileGetTokens(ifstream& file){
   char ch;
+  char Pch = '\0'; //  previos character
   vector<string> tokens;  // create a list(vector/array) to store all of the functions and individual tokens
   string currentToken;  // create a string to store the current file that the loop is on, to add to the tokens list(vector/array)
 
@@ -209,28 +230,35 @@ vector<string> fileGetTokens(ifstream& file){
   bool inString = false;
 
   while (file.get(ch)){  // checks char by char the file
+    if(!(previouslyNewLine && (ch == ' ' || ch == '\t'))){
+      if(inString){
+        currentToken += ch;
+        previouslyNewLine = false;
+      } else if(ch != ' '){
+        currentToken += ch;
+      }
+      previouslyNewLine = false;
+    } 
     if(validChars.find(ch) == string::npos){  // if ch isn't part of the valid chars string
-      if(ch == '\"' && !inString){
+      if(ch == '\"' && !inString && Pch != '\\'){
         inString = true;
-      } else if(ch == '\"' && inString){
+      } else if(ch == '\"' && inString && Pch != '\\'){
         inString = false;
       }
-      if(!currentToken.empty()){
+      if(!currentToken.empty() && !(inString)){
         tokens.push_back(currentToken);
         currentToken.clear();
       }
       previouslyNewLine = true;
     }
-    if(!(previouslyNewLine && (ch == ' ' || ch == '\t'))){
-      currentToken += ch;
-      previouslyNewLine = false;
-    }
+    Pch = ch;
   }
 
   // Check if there's still something in currentToken after the loop. this lets the last file go onto the list even if there isn't a \n or ; at the end of the file
   if(!currentToken.empty()){
     tokens.push_back(currentToken);
   }
+
   resetFile(file);
   return tokens;
 }
@@ -262,14 +290,17 @@ vector<string> combineStringsInTokens(vector<string> tokens){
 
 
 int main(){
-  ifstream file("tests/test.q");
+  ifstream file("tests/mainTest.q");
+  ifstream test("tests/test.q");
   VariableStack stack;
 
   //printFile(file); cout << "\n\n\n";
 
-  printList(combineStringsInTokens(fileGetTokens(file)));
+  //printList(combineStringsInTokens(fileGetTokens(file)));
   vector<string> tokens = fileGetTokens(file);
-  //printList(tokens);
+  printList(tokens); cout << "\n\n";
+  tokens = fileGetTokens(test);
+  printList(tokens); cout << "\n\n";
 
 /* Stack Tests
   //testing stack
