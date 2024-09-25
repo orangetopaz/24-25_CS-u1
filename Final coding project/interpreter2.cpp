@@ -234,7 +234,13 @@ vector<string> fileGetTokens(ifstream& file){
       if(inString){
         currentToken += ch;
         previouslyNewLine = false;
-      } else if(ch != ' '){
+      } else if(validChars.find(ch) != string::npos){
+        currentToken += ch;
+      } else if(validChars.find(ch) == string::npos && ch != ' '){
+        if(!currentToken.empty() && !(inString)){
+          tokens.push_back(currentToken);
+          currentToken.clear();
+        }
         currentToken += ch;
       }
       previouslyNewLine = false;
@@ -301,6 +307,7 @@ int main(){
   printList(tokens); cout << "\n\n";
   tokens = fileGetTokens(test);
   printList(tokens); cout << "\n\n";
+  cout << tokens[2].empty() << endl;
 
 /* Stack Tests
   //testing stack
@@ -330,5 +337,6 @@ int main(){
   printAny(x); */
 
   file.close();
+  test.close();
   return 0;
 }
