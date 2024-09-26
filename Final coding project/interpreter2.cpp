@@ -248,9 +248,16 @@ vector<string> fileGetTokens(ifstream& file){  // I probably spent about 1/3 of 
   while (file.get(ch)){  // checks char by char the file
 
     if(Pch == '\\'){ // maualy get rid of backslashes after they're delt with (lazy, i know, but i don't have the mental capacity to go through this mess of a function right now)
-      currentToken.pop_back();
+      if(ch == '\"'){
+        currentToken.pop_back();
+      } else if(ch == 'n'){
+        currentToken.pop_back();
+        currentToken += '\n';
+        continue;
+      }
     }
-
+    //cout << "error ";
+    //cout << ch << " ";
     if(!(previouslyNewLine && (ch == ' ' || ch == '\t'))){
       if(inString){
         currentToken += ch;
@@ -340,9 +347,9 @@ int main(){
   vector<string> tokens = fileGetTokens(file);
   listoflists_t linedTokens = tokensToLines(tokens);
 
-  //printFile(file); cout << "\n\n\n";
-  //printList(tokens); cout << "\n\n\n";
-  //printListOfLists(linedTokens); cout << "\n\n\n";
+  printFile(file); cout << "\n\n\n";
+  printList(tokens); cout << "\n\n\n";
+  printListOfLists(linedTokens); cout << "\n\n\n";
 
   string token;
   string Ptoken;
@@ -368,12 +375,12 @@ int main(){
               if(linedTokens[i][j+2] == "error"){
                 PRINT(1, linedTokens[i][j+3].substr(1, linedTokens[i][j+3].length()-2));
               } 
-              else{cout << "Sorry! Unsupourted function" << endl;}
+              else{cout << "Sorry! Unsupported function" << endl;}
 
             }
-            else{cout << "Sorry! Unsupourted." << endl;}
+            else{cout << "Sorry! Unsupported." << endl;}
           }
-          else{cout << "Sorry! Unsupourted function" << endl;}
+          else{cout << "Sorry! Unsupported function" << endl;}
         }
 
         if(token == "~" || token == "read"){
